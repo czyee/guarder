@@ -8,6 +8,7 @@ import org.czyee.guarder.node.NodeDefiner;
 import org.czyee.guarder.session.DefautSessionIdGenerator;
 import org.czyee.guarder.session.SessionIdGenerator;
 import org.czyee.guarder.util.Utils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
@@ -32,7 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AnnotatedGuarder {
+public class AnnotatedGuarder implements InitializingBean {
 
 	/**
 	 * setter的字段
@@ -238,10 +239,9 @@ public class AnnotatedGuarder {
 		permissionHandler.setSessionPermissionKey(sessionPermissionKey);
 		return permissionHandler;
 	}
-	/**
-	 * 初始化方法,暂不处理
-	 */
-	public void init() {
+
+	@Override
+	public void afterPropertiesSet() {
 		initIndex();
 		initNormal();
 	}
