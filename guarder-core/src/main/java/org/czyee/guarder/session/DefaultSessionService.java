@@ -1,14 +1,29 @@
 package org.czyee.guarder.session;
 
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+
 import java.util.*;
 
-public class DefaultSessionService implements SessionService{
+public class DefaultSessionService implements SessionService, DisposableBean, InitializingBean {
 
-	private static final Map<String , SessionAttribute> map = new HashMap<>();
+	private final Map<String , SessionAttribute> map = new HashMap<>();
 
-	private static final long expires = 1800000L;
+	/**
+	 * 默认过期时间1800秒,半小时,不允许修改
+	 */
+	private final long expires = 1000L * 1800L;
 
-	static {
+	/**
+	 * 用来整理内存的定时器
+	 */
+	private Timer timer;
+
+	/**
+	 * 实例化完成后启动定时器
+	 */
+	@Override
+	public void afterPropertiesSet() {
 		TimerTask timerTask = new TimerTask() {
 			@Override
 			public void run() {
@@ -20,20 +35,16 @@ public class DefaultSessionService implements SessionService{
 					SessionAttribute value = entry.getValue();
 					long addTime = value.addTime;
 					if (addTime + expires < currentTimeMillis){
+						//置空
+						entry.setValue(null);
 						iterator.remove();
 					}
 				}
 			}
 		};
-		final Timer timer = new Timer();
-		timer.schedule(timerTask,0L,60000L);
-		Thread shutdownHook = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				timer.cancel();
-			}
-		});
-		Runtime.getRuntime().addShutdownHook(shutdownHook);
+		timer = new Timer();
+		//每分钟执行一次
+		timer.schedule(timerTask,0L,1000L * 60L);
 	}
 
 	@Override
@@ -92,6 +103,12 @@ public class DefaultSessionService implements SessionService{
 	@Override
 	public void deleteSession(String sessionId) {
 		map.remove(sessionId);
+	}
+
+
+	@Override
+	public void destroy() throws Exception{
+		timer.cancel();
 	}
 
 	private static class SessionAttribute{

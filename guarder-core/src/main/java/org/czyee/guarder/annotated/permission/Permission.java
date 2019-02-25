@@ -13,9 +13,12 @@ public class Permission implements Serializable {
 
 	public static void initPermissions(List<Permission> permissions){
 		Permission.permissions = permissions;
-		System.out.println("permissions init success");
 	}
 
+	/**
+	 * 获取所有权限,用来给超级管理员授权
+	 * @return
+	 */
 	public static List<Permission> getAllPermissions(){
 		return permissions;
 	}

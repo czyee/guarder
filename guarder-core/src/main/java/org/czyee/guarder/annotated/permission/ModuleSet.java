@@ -26,11 +26,6 @@ public class ModuleSet extends Permission{
 			}
 		}
 		ModuleSet.moduleSets = moduleSets;
-		System.out.println("模块列表");
-		for (ModuleSet moduleSet : moduleSets) {
-			System.out.println(moduleSet.module.name() + " ==> " + moduleSet.getPath());
-		}
-		System.out.println("moduleSets init success");
 	}
 
 	public static List<ModuleSet> getAllModuleSets(){
