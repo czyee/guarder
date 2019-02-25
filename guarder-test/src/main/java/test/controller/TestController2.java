@@ -17,6 +17,11 @@ import java.util.List;
 @Controller
 public class TestController2 {
 
+
+	public TestController2(){
+		new RuntimeException().printStackTrace();
+	}
+
 	@Autowired
 	private PermissionHandler permissionHandler;
 
@@ -41,6 +46,7 @@ public class TestController2 {
 	public String ht3(){
 		List<String> list = new ArrayList<>();
 		list.add("/html/ht1.html");
+		list.add("/html/ht2.html");
 		permissionHandler.auth(list);
 		return "auth!";
 	}
@@ -56,7 +62,10 @@ public class TestController2 {
 
 	@RequestMapping("html/ht5.html")
 	@ResponseBody
-	public String ht5(){
+	public String ht5(String id){
+		if ("qqq".equals(id)){
+			throw new RuntimeException("123");
+		}
 		List<String> list = new ArrayList<>();
 		list.add("/html/ht1.html");
 		List<PermNode> simpleTreeNode = permissionHandler.getSimpleTreeNode(list);
