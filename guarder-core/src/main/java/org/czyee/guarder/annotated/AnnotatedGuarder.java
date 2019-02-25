@@ -11,6 +11,7 @@ import org.czyee.guarder.util.Utils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -33,7 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AnnotatedGuarder implements InitializingBean {
+public class AnnotatedGuarder implements InitializingBean{
 
 	/**
 	 * setter的字段
@@ -44,6 +45,8 @@ public class AnnotatedGuarder implements InitializingBean {
 	private Object[] interceptors = {};
 	private SessionIdGenerator sessionIdGenerator;
 	private String sessionPermissionKey = "USER_PERMISSION";
+	private String denyTip = "permission denied";
+	private String[] componentScans;
 	/***********************setters******************************/
 	/**
 	 * 资源文件目录,所有静态资源都应放在此目录下,默认值:resource
@@ -99,6 +102,18 @@ public class AnnotatedGuarder implements InitializingBean {
 		this.sessionPermissionKey = sessionPermissionKey;
 	}
 
+	/**
+	 * 访问被拒绝的返回
+	 * @param denyTip parm
+	 */
+	public void setDenyTip(String denyTip) {
+		this.denyTip = denyTip;
+	}
+
+	public void setComponentScans(String[] componentScans) {
+		this.componentScans = componentScans;
+	}
+
 	/***********************beans******************************/
 
 	/**
@@ -107,6 +122,7 @@ public class AnnotatedGuarder implements InitializingBean {
 	 * @return bean
 	 */
 	@Bean
+	@DependsOn("permissionHandler")
 	private RequestMappingHandlerMapping requestMappingHandlerMapping(GuarderInterceptor guarderInterceptor) {
 		RequestMappingHandlerMapping requestMappingHandlerMapping = new RequestMappingHandlerMapping();
 		Object[] interceptors = new Object[this.interceptors.length + 1];
@@ -216,7 +232,7 @@ public class AnnotatedGuarder implements InitializingBean {
 	 * @return bean
 	 */
 	@Bean
-	public GuarderInterceptor guarderInterceptor(){
+	public GuarderInterceptor guarderInterceptor(PermissionHandler permissionHandler){
 		GuarderInterceptor guarderInterceptor = new GuarderInterceptor();
 		//设置会话ID生成器
 		if (sessionIdGenerator == null){
@@ -224,6 +240,8 @@ public class AnnotatedGuarder implements InitializingBean {
 		}else {
 			guarderInterceptor.setSessionIdGenerator(sessionIdGenerator);
 		}
+		guarderInterceptor.setPermissionHandler(permissionHandler);
+		guarderInterceptor.setDenyTip(denyTip);
 		return guarderInterceptor;
 	}
 
@@ -268,5 +286,4 @@ public class AnnotatedGuarder implements InitializingBean {
 
 	@Autowired
 	private ResourceController resourceController;
-
 }

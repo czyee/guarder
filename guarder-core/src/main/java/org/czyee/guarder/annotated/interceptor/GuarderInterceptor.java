@@ -2,6 +2,7 @@ package org.czyee.guarder.annotated.interceptor;
 
 import org.czyee.guarder.annotated.annotation.Perm;
 import org.czyee.guarder.annotated.controller.ResourceController;
+import org.czyee.guarder.annotated.permission.PermissionHandler;
 import org.czyee.guarder.session.SessionIdGenerator;
 import org.czyee.guarder.session.SessionUtil;
 import org.czyee.guarder.util.CookieUtil;
@@ -13,6 +14,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
 
 public class GuarderInterceptor implements HandlerInterceptor {
 
@@ -24,6 +26,18 @@ public class GuarderInterceptor implements HandlerInterceptor {
 	private SessionIdGenerator sessionIdGenerator;
 
 	private String projectDomain;
+
+	private PermissionHandler permissionHandler;
+
+	private String denyTip;
+
+	public void setPermissionHandler(PermissionHandler permissionHandler) {
+		this.permissionHandler = permissionHandler;
+	}
+
+	public void setDenyTip(String denyTip) {
+		this.denyTip = denyTip;
+	}
 
 	public void setSessionIdGenerator(SessionIdGenerator sessionIdGenerator) {
 		if (sessionIdGenerator == null){
@@ -80,7 +94,24 @@ public class GuarderInterceptor implements HandlerInterceptor {
 		if (perm == null){
 			return true;
 		}
-		return true;
+		boolean canAccess = permissionHandler.canAccess(perm);
+		if (canAccess){
+			return true;
+		}
+		response.setContentType("text/html;charset=UTF-8");
+		PrintWriter writer = null;
+		try {
+			writer = response.getWriter();
+			writer.print(denyTip);
+			writer.flush();
+		} catch (Exception e){
+			//do nothing
+		}finally {
+			if (writer != null){
+				writer.close();
+			}
+		}
+		return false;
 	}
 
 	@Override
