@@ -36,7 +36,6 @@ public class ResourceController {
 		if (contextPath != null){
 			requestURI = new String(requestURI.toCharArray(),contextPathLength,requestURI.length() - contextPathLength);
 		}
-		System.out.println(requestURI);
 		return requestURI;
 	}
 
