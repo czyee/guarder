@@ -1,12 +1,6 @@
 package org.czyee.guarder.session;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class DefaultSessionService implements SessionService{
 
@@ -19,17 +13,20 @@ public class DefaultSessionService implements SessionService{
 			@Override
 			public void run() {
 				long currentTimeMillis = System.currentTimeMillis();
-				for (Map.Entry<String, SessionAttribute> entry : map.entrySet()) {
+				Set<Map.Entry<String, SessionAttribute>> entries = map.entrySet();
+				Iterator<Map.Entry<String, SessionAttribute>> iterator = entries.iterator();
+				while (iterator.hasNext()) {
+					Map.Entry<String, SessionAttribute> entry = iterator.next();
 					SessionAttribute value = entry.getValue();
 					long addTime = value.addTime;
 					if (addTime + expires < currentTimeMillis){
-						map.remove(entry.getKey());
+						iterator.remove();
 					}
 				}
 			}
 		};
 		final Timer timer = new Timer();
-		timer.schedule(timerTask,0L,600000L);
+		timer.schedule(timerTask,0L,60000L);
 		Thread shutdownHook = new Thread(new Runnable() {
 			@Override
 			public void run() {
