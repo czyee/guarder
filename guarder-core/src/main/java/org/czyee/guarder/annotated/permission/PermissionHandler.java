@@ -55,6 +55,19 @@ public class PermissionHandler {
 		SessionUtil.setAttribute(sessionPermissionKey,permissionAttribute);
 	}
 
+	/**
+	 * 授权全部权限
+	 */
+	public void superAuth(){
+		List<Permission> allPermissions = Permission.getAllPermissions();
+		List<String> list = new ArrayList<>();
+		for (Permission allPermission : allPermissions) {
+			list.add(allPermission.getPath());
+		}
+		auth(list);
+	}
+
+
 	public PermissionAttribute createPermissionAttribute(List<String> permPaths){
 		if (permPaths == null){
 			return null;
