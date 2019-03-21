@@ -56,6 +56,15 @@ public class ModuleSet extends Permission{
 		return null;
 	}
 
+	public static ModuleSet findByModuleId(String moduleId) {
+		for (ModuleSet moduleSet : moduleSets) {
+			if (moduleSet.getModule().id().equals(moduleId)){
+				return moduleSet;
+			}
+		}
+		return null;
+	}
+
 	public static List<ModuleSet> findNoPermModule(){
 		List<ModuleSet> list = new ArrayList<>();
 		for (ModuleSet moduleSet : moduleSets) {

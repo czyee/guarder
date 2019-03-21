@@ -270,7 +270,7 @@ public class PermissionHandler {
 		List<PermNode> noGroupPerms = null;
 		List<Permission> allPermissions = Permission.getAllPermissions();
 		for (Permission allPermission : allPermissions) {
-			ModuleSet moduleSet = ModuleSet.findByPath(allPermission.getPath());
+			ModuleSet moduleSet = ModuleSet.findByModuleId(allPermission.getPerm().module());
 			//没有父节点
 			if (moduleSet == null){
 				PermNode permNode = new PermNode();
