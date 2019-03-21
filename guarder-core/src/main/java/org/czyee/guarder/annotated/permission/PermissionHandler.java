@@ -266,6 +266,46 @@ public class PermissionHandler {
 			permNodes.add(permNode);
 		}
 
+		//获取所有没有分组的权限
+		List<PermNode> noGroupPerms = null;
+		List<Permission> allPermissions = Permission.getAllPermissions();
+		for (Permission allPermission : allPermissions) {
+			ModuleSet moduleSet = ModuleSet.findByPath(allPermission.getPath());
+			//没有父节点
+			if (moduleSet == null){
+				PermNode permNode = new PermNode();
+				if (hasPerm(allPermission.getPerm(),permissionAttribute)){
+					permNode.setChecked(1);
+				}
+				permNode.setUrl(allPermission.getPath());
+				String permName = allPermission.getPerm().name();
+				if ("".equals(permName)){
+					permNode.setName(allPermission.getPath());
+				}else {
+					permNode.setName(permName);
+				}
+				if (noGroupPerms == null){
+					noGroupPerms = new ArrayList<>();
+				}
+				noGroupPerms.add(permNode);
+			}
+		}
+		if (noGroupPerms != null){
+			PermNode permNode = new PermNode();
+			permNode.setName("(其他权限)");
+			permNode.setChildren(new ArrayList<>());
+			//其他权限
+			permNodes.add(permNode);
+
+
+			PermNode moduleNode = new PermNode();
+			permNode.getChildren().add(moduleNode);
+			moduleNode.setChildren(new ArrayList<>());
+			moduleNode.setName("(未分组权限)");
+			for (PermNode noGroupPerm : noGroupPerms) {
+				moduleNode.getChildren().add(noGroupPerm);
+			}
+		}
 		return permNodes;
 	}
 
