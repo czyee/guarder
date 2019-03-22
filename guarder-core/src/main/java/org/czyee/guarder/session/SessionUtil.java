@@ -2,6 +2,9 @@ package org.czyee.guarder.session;
 
 import org.springframework.context.ApplicationContext;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SessionUtil {
 
 	private static final ThreadLocal<String> THREAD_SESSION = new ThreadLocal<>();
@@ -60,5 +63,20 @@ public class SessionUtil {
 
 	public static void clear(){
 		THREAD_SESSION.remove();
+	}
+
+	public static List<String> findSessionIdByAttribute(String key , Object value){
+		List<String> list = sessionService.findSessionIdByKeyValue(key, value);
+		if (list == null){
+			return new ArrayList<>(0);
+		}
+		return list;
+	}
+
+	public static void kickSession(String sessionId){
+		if (sessionId == null){
+			return;
+		}
+		sessionService.deleteSession(sessionId);
 	}
 }

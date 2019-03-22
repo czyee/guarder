@@ -7,7 +7,7 @@ import java.util.*;
 
 public class DefaultSessionService implements SessionService, DisposableBean, InitializingBean {
 
-	private final Map<String , SessionAttribute> map = new HashMap<>();
+	private final Map<String , SessionAttribute> map = Collections.synchronizedMap(new TreeMap<>());
 
 	/**
 	 * 默认过期时间1800秒,半小时,不允许修改
@@ -105,6 +105,27 @@ public class DefaultSessionService implements SessionService, DisposableBean, In
 		map.remove(sessionId);
 	}
 
+	@Override
+	public List<String> findSessionIdByKeyValue(String key, Object value) {
+		if (key == null || value == null){
+			return null;
+		}
+		List<String> sessionIds = null;
+
+		for (Map.Entry<String, SessionAttribute> entry : map.entrySet()) {
+			SessionAttribute sessionAttribute = entry.getValue();
+			if (sessionAttribute == null || sessionAttribute.data == null){
+				continue;
+			}
+			if (value.equals(sessionAttribute.data.get(key))){
+				if (sessionIds == null){
+					sessionIds = new ArrayList<>();
+				}
+				sessionIds.add(entry.getKey());
+			}
+		}
+		return sessionIds;
+	}
 
 	@Override
 	public void destroy() throws Exception{
