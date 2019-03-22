@@ -6,6 +6,7 @@ import org.czyee.guarder.annotated.permission.PermissionHandler;
 import org.czyee.guarder.session.SessionIdGenerator;
 import org.czyee.guarder.session.SessionUtil;
 import org.czyee.guarder.util.CookieUtil;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -14,9 +15,10 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.PrintWriter;
 
-public class GuarderInterceptor implements HandlerInterceptor {
+public class GuarderInterceptor implements HandlerInterceptor, InitializingBean {
 
 	@Autowired
 	private ResourceController resourceController;
@@ -31,7 +33,11 @@ public class GuarderInterceptor implements HandlerInterceptor {
 
 	private String denyTip;
 
+	private String denyPage;
+
 	private LoginChecker loginChecker;
+
+	private ReqChecker reqChecker;
 
 	public void setPermissionHandler(PermissionHandler permissionHandler) {
 		this.permissionHandler = permissionHandler;
@@ -61,8 +67,23 @@ public class GuarderInterceptor implements HandlerInterceptor {
 		this.cookieName = cookieName;
 	}
 
+	public void setDenyPage(String denyPage) {
+		this.denyPage = denyPage;
+	}
+
 	public void setLoginChecker(LoginChecker loginChecker) {
 		this.loginChecker = loginChecker;
+	}
+
+	public void setReqChecker(ReqChecker reqChecker) {
+		this.reqChecker = reqChecker;
+	}
+
+	@Override
+	public void afterPropertiesSet() {
+		if (reqChecker == null){
+			reqChecker = ReqChecker.DEFAULT_REQ_CHECKER;
+		}
 	}
 
 	private void initSession(HttpServletRequest request, HttpServletResponse response){
@@ -107,10 +128,16 @@ public class GuarderInterceptor implements HandlerInterceptor {
 			if (!login){
 				//未登录,返回登录超时提示
 				String loginTimeOutTip = loginChecker.getLoginTimeOutTip();
-				if (loginTimeOutTip == null){
-					loginTimeOutTip = "login time out";
+				String loginUrl = loginChecker.getLoginUrl();
+				if (reqChecker.ajax(request)){
+					responseText(response, loginTimeOutTip);
+				}else {
+					try {
+						response.sendRedirect(loginUrl);
+					} catch (IOException e) {
+						//do nothing
+					}
 				}
-				responseText(response, loginTimeOutTip);
 				return false;
 			}
 		}
@@ -119,7 +146,19 @@ public class GuarderInterceptor implements HandlerInterceptor {
 		if (canAccess){
 			return true;
 		}
-		responseText(response,denyTip);
+		if (denyPage != null){
+			if (reqChecker.ajax(request)){
+				responseText(response,denyTip);
+			}else {
+				try {
+					response.sendRedirect(denyPage);
+				} catch (IOException e) {
+					//do nothing
+				}
+			}
+		}else {
+			responseText(response,denyTip);
+		}
 		return false;
 	}
 

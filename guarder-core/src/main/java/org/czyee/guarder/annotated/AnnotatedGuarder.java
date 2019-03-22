@@ -50,6 +50,7 @@ public class AnnotatedGuarder implements InitializingBean{
 	private String denyTip = "permission denied";
 	private String[] componentScans;
 	private LoginChecker loginChecker;
+	private String denyUrl;//无权访问跳转
 	/***********************setters******************************/
 	/**
 	 * 资源文件目录,所有静态资源都应放在此目录下,默认值:resource
@@ -119,6 +120,10 @@ public class AnnotatedGuarder implements InitializingBean{
 
 	public void setLoginChecker(LoginChecker loginChecker) {
 		this.loginChecker = loginChecker;
+	}
+
+	public void setDenyUrl(String denyUrl) {
+		this.denyUrl = denyUrl;
 	}
 
 	/***********************beans******************************/
@@ -271,6 +276,7 @@ public class AnnotatedGuarder implements InitializingBean{
 		initNormal();
 		guarderInterceptor.setDenyTip(denyTip);
 		guarderInterceptor.setLoginChecker(loginChecker);
+		guarderInterceptor.setDenyPage(denyUrl);
 	}
 
 	private void initNormal(){
