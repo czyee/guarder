@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 public class AnnotatedGuarder implements InitializingBean{
 
 	/**
@@ -262,6 +263,7 @@ public class AnnotatedGuarder implements InitializingBean{
 	public void afterPropertiesSet() {
 		initIndex();
 		initNormal();
+		guarderInterceptor.setDenyTip(denyTip);
 	}
 
 	private void initNormal(){
@@ -286,4 +288,7 @@ public class AnnotatedGuarder implements InitializingBean{
 
 	@Autowired
 	private ResourceController resourceController;
+
+	@Autowired
+	private GuarderInterceptor guarderInterceptor;
 }
