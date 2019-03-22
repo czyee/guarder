@@ -31,6 +31,8 @@ public class GuarderInterceptor implements HandlerInterceptor {
 
 	private String denyTip;
 
+	private LoginChecker loginChecker;
+
 	public void setPermissionHandler(PermissionHandler permissionHandler) {
 		this.permissionHandler = permissionHandler;
 	}
@@ -59,7 +61,11 @@ public class GuarderInterceptor implements HandlerInterceptor {
 		this.cookieName = cookieName;
 	}
 
-	private void initSession(HttpServletRequest request,HttpServletResponse response){
+	public void setLoginChecker(LoginChecker loginChecker) {
+		this.loginChecker = loginChecker;
+	}
+
+	private void initSession(HttpServletRequest request, HttpServletResponse response){
 		if (SessionUtil.hasSession()){
 			return;
 		}
@@ -94,23 +100,24 @@ public class GuarderInterceptor implements HandlerInterceptor {
 		if (perm == null){
 			return true;
 		}
+
+		if (loginChecker != null){
+			boolean login = loginChecker.checkLogin(request);
+			if (!login){
+				String loginTimeOutTip = loginChecker.getLoginTimeOutTip();
+				if (loginTimeOutTip == null){
+					loginTimeOutTip = "login time out";
+				}
+				responseText(response, loginTimeOutTip);
+				return false;
+			}
+		}
+
 		boolean canAccess = permissionHandler.canAccess(perm);
 		if (canAccess){
 			return true;
 		}
-		response.setContentType("text/html;charset=UTF-8");
-		PrintWriter writer = null;
-		try {
-			writer = response.getWriter();
-			writer.print(denyTip);
-			writer.flush();
-		} catch (Exception e){
-			//do nothing
-		}finally {
-			if (writer != null){
-				writer.close();
-			}
-		}
+		responseText(response,denyTip);
 		return false;
 	}
 
@@ -123,5 +130,21 @@ public class GuarderInterceptor implements HandlerInterceptor {
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
 		//结束后清空会话
 		SessionUtil.clear();
+	}
+
+	private void responseText(HttpServletResponse response , String text){
+		response.setContentType("text/html;charset=UTF-8");
+		PrintWriter writer = null;
+		try {
+			writer = response.getWriter();
+			writer.print(text);
+			writer.flush();
+		} catch (Exception e){
+			//do nothing
+		}finally {
+			if (writer != null){
+				writer.close();
+			}
+		}
 	}
 }

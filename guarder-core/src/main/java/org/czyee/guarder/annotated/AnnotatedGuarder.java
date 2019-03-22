@@ -2,6 +2,7 @@ package org.czyee.guarder.annotated;
 
 import org.czyee.guarder.annotated.controller.ResourceController;
 import org.czyee.guarder.annotated.interceptor.GuarderInterceptor;
+import org.czyee.guarder.annotated.interceptor.LoginChecker;
 import org.czyee.guarder.annotated.listener.RefreshListener;
 import org.czyee.guarder.annotated.permission.PermissionHandler;
 import org.czyee.guarder.node.NodeDefiner;
@@ -48,6 +49,7 @@ public class AnnotatedGuarder implements InitializingBean{
 	private String sessionPermissionKey = "USER_PERMISSION";
 	private String denyTip = "permission denied";
 	private String[] componentScans;
+	private LoginChecker loginChecker;
 	/***********************setters******************************/
 	/**
 	 * 资源文件目录,所有静态资源都应放在此目录下,默认值:resource
@@ -113,6 +115,10 @@ public class AnnotatedGuarder implements InitializingBean{
 
 	public void setComponentScans(String[] componentScans) {
 		this.componentScans = componentScans;
+	}
+
+	public void setLoginChecker(LoginChecker loginChecker) {
+		this.loginChecker = loginChecker;
 	}
 
 	/***********************beans******************************/
@@ -264,6 +270,7 @@ public class AnnotatedGuarder implements InitializingBean{
 		initIndex();
 		initNormal();
 		guarderInterceptor.setDenyTip(denyTip);
+		guarderInterceptor.setLoginChecker(loginChecker);
 	}
 
 	private void initNormal(){
