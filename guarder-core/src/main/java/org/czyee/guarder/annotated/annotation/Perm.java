@@ -21,4 +21,10 @@ public @interface Perm {
 	 * @return
 	 */
 	String module() default "";
+
+	/**
+	 * 权限是否生效,如果不生效并且定义了loginChecker则只判断登录状态,未定义loginChecker直接放行
+	 * @return
+	 */
+	boolean value() default true;
 }

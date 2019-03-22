@@ -108,7 +108,7 @@ public class PermissionHandler {
 	 * @return
 	 */
 	public boolean canAccess(Perm perm){
-		if (perm == null){
+		if (perm == null || !perm.value()){
 			return true;
 		}
 		PermissionAttribute permissionAttribute = getSessionPermissionAttribute();

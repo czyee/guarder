@@ -97,13 +97,15 @@ public class GuarderInterceptor implements HandlerInterceptor {
 			return true;
 		}
 		Perm perm = handlerMethod.getMethodAnnotation(Perm.class);
+		//没有perm注解视为不要登录即可访问,更不需要权限
 		if (perm == null){
 			return true;
 		}
-
+		//有perm注解即视为需要登录,在有登录校验器的情况下需要验登录状态
 		if (loginChecker != null){
 			boolean login = loginChecker.checkLogin(request);
 			if (!login){
+				//未登录,返回登录超时提示
 				String loginTimeOutTip = loginChecker.getLoginTimeOutTip();
 				if (loginTimeOutTip == null){
 					loginTimeOutTip = "login time out";
@@ -112,7 +114,7 @@ public class GuarderInterceptor implements HandlerInterceptor {
 				return false;
 			}
 		}
-
+		//没有登录校验器或者登录校验通过的情况下,需要校验会话权限
 		boolean canAccess = permissionHandler.canAccess(perm);
 		if (canAccess){
 			return true;

@@ -47,18 +47,20 @@ public class RefreshListener implements ApplicationListener<ContextRefreshedEven
 			Set<String> patterns = patternsCondition.getPatterns();
 			for (String pattern : patterns) {
 				Perm perm = handlerMethod.getMethodAnnotation(Perm.class);
-				if (perm != null){
+
+				if (perm != null && perm.value()){
 					Permission permission = new Permission();
 					permission.setPath(pattern);
 					permission.setPerm(perm);
 					permissions.add(permission);
 				}
+
 				Module module = handlerMethod.getMethodAnnotation(Module.class);
 				if (module != null){
 					ModuleSet moduleSet = new ModuleSet();
 					moduleSet.setModule(module);
 					moduleSet.setPath(pattern);
-					if (perm != null){
+					if (perm != null && perm.value()){
 						moduleSet.setPerm(perm);
 					}
 					moduleSets.add(moduleSet);
