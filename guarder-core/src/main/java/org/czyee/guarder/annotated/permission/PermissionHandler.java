@@ -29,10 +29,10 @@ public class PermissionHandler {
 	 * @param moduleSets
 	 */
 	public void initPermissions(List<Permission> permissions , List<ModuleSet> moduleSets){
-		ModuleSet.initModuelSets(moduleSets);
-		Permission.initPermissions(permissions);
 		Node[] nodes = nodeDefiner.getNodes();
 		Node.initNodes(Arrays.asList(nodes));
+		ModuleSet.initModuelSets(moduleSets);
+		Permission.initPermissions(permissions);
 	}
 
 	/**

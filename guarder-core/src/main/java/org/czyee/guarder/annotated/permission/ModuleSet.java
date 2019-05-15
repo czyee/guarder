@@ -14,18 +14,40 @@ public class ModuleSet extends Permission{
 	private static List<ModuleSet> moduleSets;
 
 	public static void initModuelSets(List<ModuleSet> moduleSets){
+		List<Node> nodes = Node.getAllNodes();
+		List<ModuleSet> copy = new ArrayList<>();
+		ModuleSet.moduleSets = moduleSets;
 		//得排个序
 		//冒泡排序
-		for (int i = 0 ; i < moduleSets.size() - 1 ; i ++) {
-			for (int j = 0 ; j < moduleSets.size() - 1 - i ; j ++){
-				if (moduleSets.get(j).getModule().sort() > moduleSets.get(j + 1).getModule().sort()){
-					ModuleSet temp = moduleSets.get(j);
-					moduleSets.set(j,moduleSets.get(j + 1));
-					moduleSets.set(j + 1 , temp);
+		for (Node node : nodes) {
+			List<ModuleSet> list = findByNode(node);
+			for (int i = 0 ; i < list.size() - 1 ; i ++) {
+				for (int j = 0 ; j < list.size() - 1 - i ; j ++){
+					if (list.get(j).getModule().sort() > list.get(j + 1).getModule().sort()){
+						ModuleSet temp = list.get(j);
+						list.set(j,list.get(j + 1));
+						list.set(j + 1 , temp);
+					}
 				}
 			}
+			copy.addAll(list);
 		}
-		ModuleSet.moduleSets = moduleSets;
+		//把没有父节点的模块添加进copy
+		for (ModuleSet moduleSet : moduleSets) {
+			boolean noParent = true;
+			for (Node node : nodes) {
+				if (moduleSet.getModule().node().equals(node.getName())){
+					noParent = false;
+					break;
+				}
+			}
+			if (noParent){
+				copy.add(moduleSet);
+			}
+		}
+
+
+		ModuleSet.moduleSets = copy;
 	}
 
 	public static List<ModuleSet> getAllModuleSets(){
