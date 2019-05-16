@@ -72,8 +72,39 @@ public class PermissionHandler {
 		if (permPaths == null){
 			return null;
 		}
+
+		//将路径按照配置顺序重新排序,将模块的path放在列表最前
+		List<String> copy = new ArrayList<>();
+		List<ModuleSet> allModuleSets = ModuleSet.getAllModuleSets();
+		for (ModuleSet moduleSet : allModuleSets) {
+			for (String permPath : permPaths) {
+				if (moduleSet.getPath() != null && moduleSet.getPath().equals(permPath)){
+					copy.add(permPath);
+					break;
+				}
+			}
+		}
+		//没添加的再添加一遍
+		for (String permPath : permPaths) {
+			if (!copy.contains(permPath)){
+				copy.add(permPath);
+			}
+		}
+
+		permPaths = copy;
+
 		List<Permission> permissions = new ArrayList<>();
 		List<ModuleSet> moduleSets = new ArrayList<>();
+
+		List<ModuleSet> noPermModule = ModuleSet.findNoPermModule();
+		//将不需要权限的模块也一并授权
+		for (ModuleSet moduleSet : noPermModule) {
+			//已授权的模块不含当前模块再添加
+			if (!moduleSets.contains(moduleSet)){
+				moduleSets.add(moduleSet);
+			}
+		}
+
 		for (String permPath : permPaths) {
 			if (permPath == null){
 				throw new RuntimeException("wrong permission");
@@ -87,14 +118,7 @@ public class PermissionHandler {
 				moduleSets.add(moduleSet);
 			}
 		}
-		List<ModuleSet> noPermModule = ModuleSet.findNoPermModule();
-		//将不需要权限的模块也一并授权
-		for (ModuleSet moduleSet : noPermModule) {
-			//已授权的模块不含当前模块再添加
-			if (!moduleSets.contains(moduleSet)){
-				moduleSets.add(moduleSet);
-			}
-		}
+
 		PermissionAttribute permissionAttribute = new PermissionAttribute();
 		permissionAttribute.moduleSets = moduleSets;
 		permissionAttribute.permissions = permissions;
